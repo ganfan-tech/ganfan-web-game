@@ -6,7 +6,14 @@ import { handleMouseEvent } from './MineSweeper.slice';
 
 
 const colors = {
-  1: ''
+  1: 'RGBA(66, 80, 190, 1.00)',
+  2: 'RGBA(30, 105, 3, 1.00)',
+  3: 'RGBA(173, 10, 10, 1.00)',
+  4: 'RGBA(0, 0, 133, 1.00)',
+  5: 'RGBA(128, 3, 3, 1.00)',
+  6: 'RGBA(4, 124, 123, 1.00)',
+  7: 'RGBA(172, 5, 7, 1.00)',
+  8: 'RGBA(172, 9, 13, 1.00)',
 }
 
 export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y: number }) {
@@ -101,7 +108,7 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
       }}
     >
       {/* <p style={{ lineHeight: '15px', margin: 0 }}>{mine.count} {mine.around_count}</p> */}
-      <span>
+      <span style={{color: colors[text]}}>
         {text}
       </span>
     </div>

@@ -9,9 +9,10 @@ export interface MineSweeperGameState {
   mines_initial: MineItem[];
   mines_actual: MineItem[];
   mines: MineItem[][];
+  start_time: Date | null;
 }
 
-const createInitialState = () => {
+const createInitialState: () => MineSweeperGameState = () => {
   let id = 0;
   const mines_initial: MineItem[] = [];
   for (let i = 0; i < 480; i++) {
@@ -32,6 +33,7 @@ const createInitialState = () => {
     mines_initial,
     mines_actual,
     mines: mines_matrix,
+    start_time: null,
   };
 };
 
@@ -281,6 +283,7 @@ const slice = createSlice({
         item.count = aroundItems.filter((item) => item.item.is_mine).length;
       }
       state.gameStatus = MineSweeperStatus.doing;
+      state.start_time = new Date();
 
       slice.caseReducers.clickLeft(state, action);
     },
@@ -329,6 +332,7 @@ const slice = createSlice({
     },
     clickRight: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number }>) => {
       // 插旗子或取消插旗子
+      console.log(action);
       const clickIndex = action.payload.clickIndex;
       const clickItem = state.mines_actual[clickIndex];
 
@@ -337,14 +341,36 @@ const slice = createSlice({
       } else if (clickItem.status === MineItemStatus.flag) {
         clickItem.status = MineItemStatus.close;
       } else if (clickItem.status === MineItemStatus.open) {
-        // 打开的状态下，判断数字跟周围的旗子数是否匹配
-        // 如果匹配，将周围非旗子的位置打开
+        // 打开的状态下，右击相当于触发中键点击
+        slice.caseReducers.clickMiddle(state, action);
       }
 
       state.mines_actual = [...state.mines_actual];
       state.mines = chunk(state.mines_actual, 30);
     },
-    clickMiddle: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number }>) => {},
+    clickMiddle: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number }>) => {
+      // 判断数字跟周围的旗子数是否匹配
+      // 如果匹配，将周围非旗子的位置打开
+      const clickIndex = action.payload.clickIndex;
+      const clickItem = state.mines_actual[clickIndex];
+      if (clickItem.status !== MineItemStatus.open) return;
+      if (clickItem.count === 0) return;
+
+      const aroundItems = getAroundItemsFromArray(state.mines_actual, clickIndex);
+      const flagCount = aroundItems.filter((item) => item.item.status === MineItemStatus.flag).length;
+      if (flagCount !== clickItem.count) {
+        // TODO 最好能闪一下，给个提示
+        return;
+      }
+      // 打开周围没有标记旗子的位置
+      const aroundItemsClose = aroundItems.filter((item) => item.item.status === MineItemStatus.close);
+      for (let i = 0; i < aroundItemsClose.length; i++) {
+        slice.caseReducers.clickLeft(state, {
+          type: 'mineSweeper/clickLeft',
+          payload: { clickIndex: aroundItemsClose[i].index },
+        });
+      }
+    },
     handleMouseEvent: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number; button: number }>) => {
       const gameStatus = state.gameStatus;
       const { clickIndex, button } = action.payload;

@@ -3,16 +3,22 @@ import { login } from '../../services/conduit';
 import { dispatchOnCall, store } from '../../state/store';
 import { useStoreWithInitializer } from '../../state/storeHooks';
 import { loadUserIntoApp } from '../../types/user';
-import { MineItem, MineSweeperStatus } from '../../types/mine-sweeper';
+import { MineItem, MineItemStatus, MineSweeperStatus } from '../../types/mine-sweeper';
 import { GenericForm } from '../../components/GenericForm/GenericForm';
 import { initGame, startGame } from './MineSweeper.slice';
 import { ContainerPage } from '../../components/ContainerPage/ContainerPage';
 
 import { MineItemComponent } from './MineItem';
 import './mine-sweeper.less';
+import { Button, Input, Layout, Typography, Menu, MenuProps, Tag, Divider } from 'antd';
+const { Header, Footer, Sider, Content } = Layout;
+const { Title, Text } = Typography;
 
 export function MineSweeperGame() {
-  const { mines, gameStatus } = useStoreWithInitializer(({ mineSweeper }) => mineSweeper, dispatchOnCall(initGame()));
+  const { mines, gameStatus, start_time, mines_actual } = useStoreWithInitializer(
+    ({ mineSweeper }) => mineSweeper,
+    dispatchOnCall(initGame())
+  );
 
   /**
    * 99个雷
@@ -40,57 +46,88 @@ export function MineSweeperGame() {
     btnText = '🙄';
   }
 
+  let timeText = '';
+  if (start_time !== null) {
+    timeText = '用时: ';
+    timeText += Math.floor((new Date().getTime() - start_time.getTime()) / 1000);
+  }
+
+  let flagText = '';
+  if (gameStatus !== MineSweeperStatus.doing) {
+    const flagCount = mines_actual.filter((item) => item.status === MineItemStatus.flag).length;
+    flagText = `旗数/雷数: ${flagCount}/99`;
+  }
+
   return (
-    <div className='mine-sweeper-container'>
-      <div className='game-title'>
-        <h2>扫雷</h2>
-      </div>
-      <div className='mine-sweeper-controller'>
-        <button
-          onClick={() => {
-            store.dispatch(initGame());
+    <Layout
+      style={{
+        height: '100vh',
+        color: 'rgba(190, 190, 190, 1.00)',
+      }}
+    >
+      <Header
+        style={{
+          padding: '0 20px',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          style={{
+            color: 'white',
+            fontSize: '32px',
           }}
         >
-          {btnText}
-        </button>
-      </div>
-      <div className='mine-sweeper'>
-        <div style={{ backgroundColor: 'gray' }}>
-          {mines.map((row, x) => {
-            return (
-              <div key={row[0].id} className='row' style={{ display: 'flex' }}>
-                {row.map((item, y) => {
-                  return <MineItemComponent key={item.id} mine={item} x={x} y={y} />;
-                })}
-              </div>
-            );
-          })}
+          GanFan.Game
+        </Text>
+        <Divider type='vertical' />
+        <Text
+          style={{
+            color: 'white',
+            fontSize: '18px',
+          }}
+        >
+          扫雷
+        </Text>
+      </Header>
+      <Content className='page-content'>
+        <div className='game-container'>
+          <div className='mine-sweeper-controller-wrapper wrapper'>
+            <div className='mine-sweeper-controller'>
+              <div>{flagText}</div>
+              <button
+                type='button'
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  lineHeight: '1',
+                }}
+                // shape='circle'
+                // size='large'
+                onClick={() => {
+                  store.dispatch(initGame());
+                }}
+              >
+                <span style={{ fontSize: '30px' }}>{btnText}</span>
+              </button>
+              <div>{timeText}</div>
+            </div>
+          </div>
+          <div className='mine-sweeper-body-wrapper wrapper' style={{ marginTop: '20px' }}>
+            <div className='mine-sweeper-body'>
+              {mines.map((row, x) => {
+                return (
+                  <div key={row[0].id} className='row' style={{ display: 'flex' }}>
+                    {row.map((item, y) => {
+                      return <MineItemComponent key={item.id} mine={item} x={x} y={y} />;
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </Content>
+    </Layout>
   );
 }
-
-// function onUpdateField(name: string, value: string) {
-//   store.dispatch(updateField({ name: name as keyof LoginState['user'], value }));
-// }
-
-// async function signIn(ev: React.FormEvent) {
-//   ev.preventDefault();
-
-//   if (store.getState().login.loginIn) return;
-//   store.dispatch(startLoginIn());
-
-//   const { email, password } = store.getState().login.user;
-//   const result = await login(email, password);
-
-//   result.match({
-//     ok: (user) => {
-//       location.hash = '/';
-//       loadUserIntoApp(user);
-//     },
-//     err: (e) => {
-//       store.dispatch(updateErrors(e));
-//     },
-//   });
-// }

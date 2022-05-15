@@ -1,54 +1,95 @@
-.mine-sweeper-container {
-  .mine-sweeper {
-    width: 900px;
-    .mine-item {
-      width: 30px;
-      height: 30px;
-      align-content: center;
-      text-align: center;
+.page-content {
+  background-color: rgba(190, 190, 190, 1);
 
-      &.mine-item-open {
-        background-image: url(../../assets/open_background.png);
-        background-repeat: no-repeat;
-        background-size: cover;
-      }
+  .game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
 
-      &.mine-item-close {
-        background-image: url(../../assets/close_background.png);
-        background-repeat: no-repeat;
-        background-size: cover;
-      }
+    .wrapper {
+      box-sizing: content-box;
+      width: 900px;
+      padding: 3px;
 
-      &.is-mine {
-        color: red;
+      // border-radius: 3px;
+      // background: #e0e0e0;
+      box-shadow: inset 3px 3px 0px rgba(123, 123, 123, 1), inset -3px -3px 0px rgba(254, 254, 254, 1);
+    }
+    .mine-sweeper-controller {
+      margin: 10px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      font-size: 20px;
+      & > * {
+        flex: 1;
       }
-
-      span {
-        line-height: 30px;
-        margin: 0;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: default;
-        user-select: none;
+      & > :last-child{
+        display: flex;
+        justify-content: end;
       }
-
-      &.flag-error {
-        position: relative;
+      button {
+        background-color: transparent;
+        border: none;
+        line-height: 1;
+        font-size: 30px;
       }
-      &.flag-error::before,
-      &.flag-error::after {
-        content: '';
-        position: absolute;
-        background-color: black;
-        left: 15px;
-        width: 2px;
+    }
+    .mine-sweeper-body {
+      width: 900px;
+      .mine-item {
+        width: 30px;
         height: 30px;
-      }
-      &.flag-error::before {
-        transform: rotate(45deg);
-      }
-      &.flag-error::after {
-        transform: rotate(-45deg);
+        align-content: center;
+        text-align: center;
+
+        &.mine-item-open {
+          background-image: url(../../assets/open_background.png);
+          background-repeat: no-repeat;
+          background-size: cover;
+        }
+
+        &.mine-item-close {
+          background-image: url(../../assets/close_background.png);
+          background-repeat: no-repeat;
+          background-size: cover;
+        }
+
+        &.is-mine {
+          color: red;
+        }
+
+        span {
+          line-height: 30px;
+          margin: 0;
+          color: blue;
+          font-size: 18px;
+          font-weight: bold;
+          cursor: default;
+          user-select: none;
+        }
+
+        &.flag-error {
+          position: relative;
+        }
+        &.flag-error::before,
+        &.flag-error::after {
+          content: '';
+          position: absolute;
+          background-color: black;
+          left: 15px;
+          width: 2px;
+          height: 30px;
+        }
+        &.flag-error::before {
+          transform: rotate(45deg);
+        }
+        &.flag-error::after {
+          transform: rotate(-45deg);
+        }
       }
     }
   }
