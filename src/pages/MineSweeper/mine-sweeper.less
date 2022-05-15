@@ -1,0 +1,55 @@
+.mine-sweeper-container {
+  .mine-sweeper {
+    width: 900px;
+    .mine-item {
+      width: 30px;
+      height: 30px;
+      align-content: center;
+      text-align: center;
+
+      &.mine-item-open {
+        background-image: url(../../assets/open_background.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      &.mine-item-close {
+        background-image: url(../../assets/close_background.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      &.is-mine {
+        color: red;
+      }
+
+      span {
+        line-height: 30px;
+        margin: 0;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: default;
+        user-select: none;
+      }
+
+      &.flag-error {
+        position: relative;
+      }
+      &.flag-error::before,
+      &.flag-error::after {
+        content: '';
+        position: absolute;
+        background-color: black;
+        left: 15px;
+        width: 2px;
+        height: 30px;
+      }
+      &.flag-error::before {
+        transform: rotate(45deg);
+      }
+      &.flag-error::after {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+}
