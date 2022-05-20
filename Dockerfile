@@ -31,3 +31,5 @@ npm run build:prod
 RUN ossutil64
 RUN ossutil64 cp -r dist oss://ganfan-tech/web/game/main/ --force
 RUN ossutil64 cp dist/index.html oss://ganfan-tech/web-html/game/main/index.html --force
+
+RUN curl -X POST -H "Refresh-OSS: immediately" https://game.ganfan.tech/html/refresh
