@@ -20,7 +20,7 @@ ADD . /ganfan-web
 # WORKDIR /ganfan-web
 
 # 上传OSS的构建
-RUN PUBLIC_URL="https://ganfan-tech.oss-cn-beijing.aliyuncs.com/web/game/main" \
+RUN CDN_ROOT="https://ganfan-tech.oss-cn-beijing.aliyuncs.com/web/game/main" \
 npm run build:prod
 
 RUN ossutil64 cp -r dist oss://ganfan-tech/web/game/main/ --force
