@@ -53,10 +53,8 @@ export function MineSweeperGame() {
   }
 
   let flagText = '';
-  if (gameStatus !== MineSweeperStatus.doing) {
     const flagCount = mines_actual.filter((item) => item.status === MineItemStatus.flag).length;
     flagText = `旗数/雷数: ${flagCount}/99`;
-  }
 
   return (
     <Layout

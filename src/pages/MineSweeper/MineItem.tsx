@@ -63,8 +63,14 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
   } else if (gameStatus === MineSweeperStatus.success) {
     // 所有的雷都没打开，
     // 所有非雷都打开了
-    if (mine.is_mine) {
-      text = '💣';
+    if (mine.status === MineItemStatus.flag) {
+      text = '🚩';
+    } else if (mine.is_mine) {
+      // text = '🧨';
+      // text = '🏴';
+      // text = '🏁';
+      // text = '🏳️‍🌈';
+      text = '😎';
     } else {
       if (mine.count > 0) {
         text = `${mine.count}`;
