@@ -27,7 +27,10 @@ export interface MineItem {
   // 当前状态
   status: MineItemStatus;
   // 周围雷的数量
-  count: number;
+  around_mine_count: number;
   // 周围位置总数
   around_count: number;
+
+  // 处理完成，周围非雷位置均打开
+  resolved?: boolean;
 }

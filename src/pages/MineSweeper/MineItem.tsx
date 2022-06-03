@@ -17,7 +17,7 @@ const colors = {
 }
 
 export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y: number }) {
-  const { mines, gameStatus } = useStore(({ mineSweeper }) => mineSweeper);
+  const { gameStatus } = useStore(({ mineSweeper }) => mineSweeper);
 
   /**
    * 有两种效果，打开或关闭
@@ -42,8 +42,8 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
   }
   let text = '';
 
-  if (mine.status === MineItemStatus.open && mine.count > 0) {
-    text = `${mine.count}`;
+  if (mine.status === MineItemStatus.open && mine.around_mine_count > 0) {
+    text = `${mine.around_mine_count}`;
   } 
   if (gameStatus === MineSweeperStatus.init) {
     text = '';
@@ -51,8 +51,8 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
     if (mine.status === MineItemStatus.flag) {
       text = '🚩';
     } else if (mine.status === MineItemStatus.open) {
-      if (mine.count > 0) {
-        text = `${mine.count}`;
+      if (mine.around_mine_count > 0) {
+        text = `${mine.around_mine_count}`;
       } else {
         text = '';
       }
@@ -72,8 +72,8 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
       // text = '🏳️‍🌈';
       text = '😎';
     } else {
-      if (mine.count > 0) {
-        text = `${mine.count}`;
+      if (mine.around_mine_count > 0) {
+        text = `${mine.around_mine_count}`;
       } else {
         text = '';
       }

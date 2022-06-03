@@ -5,7 +5,7 @@ import { useStoreWithInitializer } from '../../state/storeHooks';
 import { loadUserIntoApp } from '../../types/user';
 import { MineItem, MineItemStatus, MineSweeperStatus } from '../../types/mine-sweeper';
 import { GenericForm } from '../../components/GenericForm/GenericForm';
-import { initGame, autoSweepMine } from './MineSweeper.slice';
+import { initGame, autoSweepMine, autoSweepMineDoing } from './MineSweeper.slice';
 import { ContainerPage } from '../../components/ContainerPage/ContainerPage';
 
 import { MineItemComponent } from './MineItem';
@@ -15,7 +15,7 @@ const { Header, Footer, Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
 export function MineSweeperGame() {
-  const { mines, gameStatus, start_time, mines_actual } = useStoreWithInitializer(
+  const { mines_matrix, gameStatus, start_time, mines_actual } = useStoreWithInitializer(
     ({ mineSweeper }) => mineSweeper,
     dispatchOnCall(initGame())
   );
@@ -116,7 +116,7 @@ export function MineSweeperGame() {
           </div>
           <div className='mine-sweeper-body-wrapper wrapper' style={{ marginTop: '20px' }}>
             <div className='mine-sweeper-body'>
-              {mines.map((row, x) => {
+              {mines_matrix.map((row, x) => {
                 return (
                   <div key={row[0].id} className='row' style={{ display: 'flex' }}>
                     {row.map((item, y) => {
@@ -128,12 +128,24 @@ export function MineSweeperGame() {
             </div>
           </div>
           <div>
-            <Button
+            {/* <Button
               onClick={() => {
-                store.dispatch(initGame());
+                store.dispatch(autoSweepMine());
               }}
             >
-              自动扫雷
+              半自动扫雷
+            </Button> */}
+
+            <Button
+              onClick={() => {
+                if (gameStatus === MineSweeperStatus.doing) {
+                  store.dispatch(autoSweepMineDoing());
+                } else {
+                  store.dispatch(autoSweepMine());
+                }
+              }}
+            >
+              {gameStatus === MineSweeperStatus.doing ? '继续' : '开始'}半自动扫雷
             </Button>
           </div>
         </div>
