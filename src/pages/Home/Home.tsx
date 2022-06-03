@@ -1,5 +1,5 @@
 import { Option } from '@hqoss/monads';
-import { getArticles, getFeed, getTags, getTasks } from '../../services/conduit';
+import { getArticles, getFeed, getTags } from '../../services/conduit';
 import { store } from '../../state/store';
 import { useStore, useStoreWithInitializer } from '../../state/storeHooks';
 import { FeedFilters } from '../../types/article';
@@ -17,15 +17,13 @@ import { MultipleTasks } from '../../types/task';
 import { List, Avatar, Space } from 'antd';
 import { MessageOutlined, LikeOutlined, StarOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
-
+import { Card } from 'antd';
+const { Meta } = Card;
 const { Title, Text } = Typography;
 const items1: MenuProps['items'] = ['1', '2', '3'].map((key) => ({
   key,
   label: `nav ${key}`,
 }));
-
-import { TaskHome } from '../Task/TaskHome';
-import { MineSweeperGame } from '../MineSweeper/MineSweeper';
 
 const data = [
   {
@@ -46,12 +44,6 @@ const data = [
   { title: 'Man charged over missing wedding girl.', description: 'charged over missing wedding girl' },
   { title: 'Man charged over missing wedding girl.', description: 'charged over missing wedding girl' },
 ];
-const IconText = ({ icon, text }) => (
-  <Space>
-    {React.createElement(icon)}
-    {text}
-  </Space>
-);
 const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOutlined].map((icon, index) => {
   const key = String(index + 1);
 
@@ -71,10 +63,8 @@ const items2: MenuProps['items'] = [UserOutlined, LaptopOutlined, NotificationOu
 });
 
 export function Home() {
-  return <MineSweeperGame />;
   const { tags, selectedTab } = useStoreWithInitializer(({ home }) => home, load);
   const { articles, articlesCount, currentPage } = useStore(({ articleViewer }) => articleViewer);
-  const { tasks } = useStore(({ taskList }) => taskList);
 
   return (
     <Layout
@@ -95,14 +85,11 @@ export function Home() {
             fontSize: '32px',
           }}
         >
-          GanFan.DO
+          GanFan.Game
         </Text>
-        <div style={{ marginLeft: '100px' }}>
-          <CreateTask />
-        </div>
       </Header>
       <Layout>
-        <Sider
+        {/* <Sider
           width='30vw'
           theme='light'
           style={{
@@ -110,14 +97,20 @@ export function Home() {
             overflow: 'auto',
           }}
         >
-          <div>
-            <TaskList tasks={tasks} />
-          </div>
-        </Sider>
+          
+        </Sider> */}
         <Content style={{ overflow: 'auto' }}>
-          <div>
-            <TaskDetail task={data[0]} />
-          </div>
+          <Card
+            cover={<img alt='example' src='https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png' />}
+            size='small'
+            style={{ width: 300 }}
+          >
+            <Meta
+              avatar={<Avatar src='https://joeschmoe.io/api/v1/random' />}
+              title={<a href='/mine-sweeper-game'>扫雷</a>}
+              description=""
+            />
+          </Card>
         </Content>
       </Layout>
     </Layout>
@@ -177,18 +170,15 @@ export function Home() {
 // }
 
 async function load() {
-  store.dispatch(startLoadingArticles());
+  // store.dispatch(startLoadingArticles());
   // store.dispatch(startLoadingTasks());
   // store.dispatch(startLoadingTags());
-
   // if (store.getState().app.user.isSome()) {
   //   store.dispatch(changeTab('Your Feed'));
   // }
-
-  const multipleArticles = await getFeedOrGlobalArticles();
-  console.log(multipleArticles);
-  store.dispatch(loadArticles(multipleArticles));
-
+  // const multipleArticles = await getFeedOrGlobalArticles();
+  // console.log(multipleArticles);
+  // store.dispatch(loadArticles(multipleArticles));
   // const multipleTasks = await getTasks();
   // const multipleTasks: MultipleTasks = {
   //   tasks: [
@@ -204,7 +194,6 @@ async function load() {
   //   count: 1,
   // };
   // store.dispatch(loadTasks(multipleTasks));
-
   // const tagsResult = await getTags();
   // store.dispatch(loadTags(tagsResult.tags));
 }

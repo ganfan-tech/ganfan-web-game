@@ -5,7 +5,7 @@ import { useStoreWithInitializer } from '../../state/storeHooks';
 import { loadUserIntoApp } from '../../types/user';
 import { MineItem, MineItemStatus, MineSweeperStatus } from '../../types/mine-sweeper';
 import { GenericForm } from '../../components/GenericForm/GenericForm';
-import { initGame, startGame } from './MineSweeper.slice';
+import { initGame, autoSweepMine } from './MineSweeper.slice';
 import { ContainerPage } from '../../components/ContainerPage/ContainerPage';
 
 import { MineItemComponent } from './MineItem';
@@ -53,8 +53,8 @@ export function MineSweeperGame() {
   }
 
   let flagText = '';
-    const flagCount = mines_actual.filter((item) => item.status === MineItemStatus.flag).length;
-    flagText = `旗数/雷数: ${flagCount}/99`;
+  const flagCount = mines_actual.filter((item) => item.status === MineItemStatus.flag).length;
+  flagText = `旗数/雷数: ${flagCount}/99`;
 
   return (
     <Layout
@@ -93,21 +93,24 @@ export function MineSweeperGame() {
           <div className='mine-sweeper-controller-wrapper wrapper'>
             <div className='mine-sweeper-controller'>
               <div>{flagText}</div>
-              <button
-                type='button'
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  lineHeight: '1',
-                }}
-                // shape='circle'
-                // size='large'
-                onClick={() => {
-                  store.dispatch(initGame());
-                }}
-              >
-                <span style={{ fontSize: '30px' }}>{btnText}</span>
-              </button>
+              <div className='start-btn'>
+                <button
+                  type='button'
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    lineHeight: '1',
+                  }}
+                  // shape='circle'
+                  // size='large'
+                  onClick={() => {
+                    store.dispatch(initGame());
+                  }}
+                >
+                  <span style={{ fontSize: '30px' }}>{btnText}</span>
+                </button>
+              </div>
+
               <div>{timeText}</div>
             </div>
           </div>
@@ -123,6 +126,15 @@ export function MineSweeperGame() {
                 );
               })}
             </div>
+          </div>
+          <div>
+            <Button
+              onClick={() => {
+                store.dispatch(initGame());
+              }}
+            >
+              自动扫雷
+            </Button>
           </div>
         </div>
       </Content>

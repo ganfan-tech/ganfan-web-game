@@ -8,6 +8,8 @@ import { EditArticle } from '../pages/EditArticle/EditArticle';
 import { Footer } from '../components/Footer/Footer';
 import { Header } from '../components/Header/Header';
 import { Home } from '../pages/Home/Home';
+import { MineSweeperGame } from '../pages/MineSweeper/MineSweeper';
+
 import { NewArticle } from '../pages/NewArticle/NewArticle';
 import { Register } from '../pages/Register/Register';
 import { Settings } from '../pages/Settings/Settings';
@@ -41,8 +43,8 @@ export function App() {
             <Route path='/profile/:username'>
               <ProfilePage />
             </Route>
-            <Route path='/article/:slug'>
-              <ArticlePage />
+            <Route path='/mine-sweeper-game'>
+              <MineSweeperGame />
             </Route>
             <Route exact path='/'>
               <Home />

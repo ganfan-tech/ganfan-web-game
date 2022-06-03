@@ -396,9 +396,17 @@ const slice = createSlice({
 
       // 点击
     },
+
+    /**
+     * 自动扫雷
+     * 先初始化游戏，然后点击屏幕中心位置，然后开始扫雷
+     */
+    autoSweepMine: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number; button: number }>) => {
+
+    },
   },
 });
 
-export const { initGame, gameSuccess, gameFail, startGame, handleMouseEvent } = slice.actions;
+export const { initGame, handleMouseEvent, autoSweepMine } = slice.actions;
 
 export default slice.reducer;
