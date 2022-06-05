@@ -33,4 +33,7 @@ export interface MineItem {
 
   // 处理完成，周围非雷位置均打开
   resolved?: boolean;
+
+  // 二选一
+  group_2_1: number[];
 }

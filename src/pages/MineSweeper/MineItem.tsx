@@ -3,7 +3,7 @@ import { store } from '../../state/store';
 import { useStoreWithInitializer, useStore } from '../../state/storeHooks';
 import { MineItem, MineItemStatus, MineSweeperStatus } from '../../types/mine-sweeper';
 import { handleMouseEvent } from './MineSweeper.slice';
-
+import { Tooltip } from 'antd';
 
 const colors = {
   1: 'RGBA(66, 80, 190, 1.00)',
@@ -112,11 +112,20 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
         console.log('click', x, y, e);
         store.dispatch(handleMouseEvent({ clickIndex: mine.index, button: e.button }));
       }}
+
+      
+      onAuxClick={(e) => {
+        console.log('onAuxClick', x, y, mine.index);
+      }}
     >
       {/* <p style={{ lineHeight: '15px', margin: 0 }}>{mine.count} {mine.around_count}</p> */}
+      <Tooltip title={`${x}, ${y}, ${mine.index}`}>
+
       <span style={{color: colors[text]}}>
-        {text}
+        {text || '.'}
       </span>
+      </Tooltip>
+
     </div>
   );
 }
