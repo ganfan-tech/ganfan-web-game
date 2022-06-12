@@ -14,6 +14,15 @@ export enum MineItemStatus {
   flag,
   // 问号
 }
+
+export enum ClickButtonType {
+  // 左键
+  left = 0,
+  // 中键
+  middle = 1,
+  // 右键
+  right = 2,
+}
 export interface MineItem {
   // 雷的编号，初始位置
   id: number;
@@ -33,7 +42,4 @@ export interface MineItem {
 
   // 处理完成，周围非雷位置均打开
   resolved?: boolean;
-
-  // 二选一
-  group_2_1: number[];
 }

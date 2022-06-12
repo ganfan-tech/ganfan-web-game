@@ -14,7 +14,7 @@ const colors = {
   6: 'RGBA(4, 124, 123, 1.00)',
   7: 'RGBA(172, 5, 7, 1.00)',
   8: 'RGBA(172, 9, 13, 1.00)',
-}
+};
 
 export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y: number }) {
   const { gameStatus } = useStore(({ mineSweeper }) => mineSweeper);
@@ -44,7 +44,7 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
 
   if (mine.status === MineItemStatus.open && mine.around_mine_count > 0) {
     text = `${mine.around_mine_count}`;
-  } 
+  }
   if (gameStatus === MineSweeperStatus.init) {
     text = '';
   } else if (gameStatus === MineSweeperStatus.doing) {
@@ -84,7 +84,7 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
     } else if (mine.status === MineItemStatus.flag) {
       text = '🚩';
       if (mine.is_mine === 0) {
-        classes.push('flag-error')
+        classes.push('flag-error');
       }
     } else if (mine.is_mine) {
       text = '💣';
@@ -95,7 +95,7 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
   //   text = '❌';
   // } else if (mine.status === MineItemStatus.open && mine.count > 0) {
   //   text = `${mine.count}`;
-  // } 
+  // }
 
   // const classes = ['mine-item', isOpen ? 'mine-item-open' : 'mine-item-close'];
   // if (mine.is_mine) {
@@ -105,27 +105,16 @@ export function MineItemComponent({ mine, x, y }: { mine: MineItem; x: number; y
   return (
     <div
       className={classes.join(' ')}
-      // onAuxClick={(e) => {
-      //   console.log('auxClick', e);
-      // }}
       onMouseUp={(e) => {
         console.log('click', x, y, e);
         store.dispatch(handleMouseEvent({ clickIndex: mine.index, button: e.button }));
       }}
-
-      
-      onAuxClick={(e) => {
-        console.log('onAuxClick', x, y, mine.index);
-      }}
     >
-      {/* <p style={{ lineHeight: '15px', margin: 0 }}>{mine.count} {mine.around_count}</p> */}
-      <Tooltip title={`${x}, ${y}, ${mine.index}`}>
+      <span style={{ color: colors[text] }}>{text}</span>
 
-      <span style={{color: colors[text]}}>
-        {text || '.'}
-      </span>
-      </Tooltip>
-
+      {/* <Tooltip title={`${x}, ${y}, ${mine.index}`}>
+        <span style={{ color: colors[text] }}>{text || '.'}</span>
+      </Tooltip> */}
     </div>
   );
 }

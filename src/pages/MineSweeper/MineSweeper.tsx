@@ -139,7 +139,7 @@ export function MineSweeperGame() {
             <Button
               onClick={() => {
                 if (gameStatus === MineSweeperStatus.doing) {
-                  store.dispatch(autoSweepMineDoing());
+                  store.dispatch(autoSweepMineDoing({ trigger: 'btn' }));
                 } else {
                   store.dispatch(autoSweepMine());
                 }
