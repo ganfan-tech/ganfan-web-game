@@ -1,8 +1,10 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, current } from '@reduxjs/toolkit';
 import { GenericErrors } from '../../types/error';
-import { MineItem, MineSweeperStatus, MineItemStatus } from '../../types/mine-sweeper';
-import { chunk, shuffle } from 'lodash';
+import { MineItem, MineSweeperStatus, MineItemStatus, ClickButtonType } from '../../types/mine-sweeper';
+import { chunk, shuffle, intersection, findIndex, difference, isEqual } from 'lodash';
 import { store } from '../../state/store';
+
+const timeout = 50;
 
 export interface MineSweeperGameState {
   gameStatus: MineSweeperStatus;
@@ -10,6 +12,7 @@ export interface MineSweeperGameState {
   mines_actual: MineItem[];
   mines_matrix: MineItem[][];
   start_time: Date | null;
+  group_2_1: Map<number, number[][]>;
 }
 
 const createInitialState: () => MineSweeperGameState = () => {
@@ -34,6 +37,7 @@ const createInitialState: () => MineSweeperGameState = () => {
     mines_actual,
     mines_matrix,
     start_time: null,
+    group_2_1: new Map(),
   };
 };
 
@@ -226,8 +230,8 @@ const slice = createSlice({
       state.gameStatus = MineSweeperStatus.fail;
     },
     startGame: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number }>) => {
+      console.log('开始游戏');
       const clickIndex = action.payload.clickIndex;
-      console.log('点击位置', clickIndex);
       // 打乱顺序
       const len = state.mines_actual.length;
       state.mines_actual = shuffle(state.mines_actual);
@@ -249,16 +253,16 @@ const slice = createSlice({
         // console.log(item);
 
         for (; switchIndex < len; switchIndex += 3) {
-          console.log(
-            switchIndex,
-            Math.floor(switchIndex / 30),
-            switchIndex % 30,
-            state.mines_actual[switchIndex].is_mine,
-            judgeIsAround(clickIndex, switchIndex)
-          );
+          // console.log(
+          //   switchIndex,
+          //   Math.floor(switchIndex / 30),
+          //   switchIndex % 30,
+          //   state.mines_actual[switchIndex].is_mine,
+          //   judgeIsAround(clickIndex, switchIndex)
+          // );
           if (state.mines_actual[switchIndex].is_mine === 0 && !judgeIsAround(clickIndex, switchIndex)) {
             // 找到第一个不是雷的位置，交换
-            console.log('交换位置', item.index, switchIndex);
+            // console.log('交换位置', item.index, switchIndex);
             [state.mines_actual[switchIndex], state.mines_actual[item.index]] = [
               state.mines_actual[item.index],
               state.mines_actual[switchIndex],
@@ -308,22 +312,6 @@ const slice = createSlice({
       state.mines_actual = [...state.mines_actual];
       state.mines_matrix = chunk(state.mines_actual, 30);
 
-      // 深度遍历
-      // 如果当前位置为空，要把周围的都打开
-      // if (state.mines_actual[clickIndex].count === 0) {
-      //   const aroundItems = getAroundItemsFromArray(state.mines_actual, clickIndex);
-      //   aroundItems.forEach((item) => {
-      //     if (item.item.status === MineItemStatus.close && item.item.is_mine === 0) {
-      //       item.item.status = MineItemStatus.open;
-      //       // 再遍历它周围的位置
-      //       if (item.item.count === 0) {
-      //         // 位置 item.位置
-      //         const aroundItems = getAroundItemsFromArray(state.mines_actual, clickIndex);
-      //       }
-      //     }
-      //   });
-      // }
-
       // 每次点击都要遍历， 如果所有不是雷的区域都是open了，说明就赢了
       const allOpen = state.mines_actual.every((item) => {
         if (item.is_mine === 0 && item.status === MineItemStatus.open) return true;
@@ -333,9 +321,57 @@ const slice = createSlice({
         slice.caseReducers.gameSuccess(state);
       }
     },
+    // 打开多个
+    openMulti: (state: MineSweeperGameState, action: PayloadAction<{ clickIndexes: Array<number> }>) => {
+      const clickIndexes = action.payload.clickIndexes;
+      for (let i = 0; i < clickIndexes.length; i++) {
+        const clickIndex = clickIndexes[i];
+
+        const clickItem = state.mines_actual[clickIndex];
+
+        // 如果当前状态为打开或者插旗子都返回
+        if (clickItem.status !== MineItemStatus.close) continue;
+
+        if (clickItem.is_mine === 1) {
+          clickItem.isTippingPoint = true;
+          store.dispatch(gameFail({ clickIndex }));
+          return;
+        }
+
+        // 左击
+        clickItem.status = MineItemStatus.open;
+        openAroundItems(state.mines_actual, clickIndex);
+      }
+
+      state.mines_actual = [...state.mines_actual];
+      state.mines_matrix = chunk(state.mines_actual, 30);
+
+      // 每次点击都要遍历， 如果所有不是雷的区域都是open了，说明就赢了
+      const allOpen = state.mines_actual.every((item) => {
+        if (item.is_mine === 0 && item.status === MineItemStatus.open) return true;
+        if (item.is_mine === 1 && item.status !== MineItemStatus.open) return true;
+      });
+      if (allOpen) {
+        store.dispatch(gameSuccess());
+      }
+    },
+    flagMulti: (state: MineSweeperGameState, action: PayloadAction<{ clickIndexes: Array<number> }>) => {
+      const clickIndexes = action.payload.clickIndexes;
+      for (let i = 0; i < clickIndexes.length; i++) {
+        const clickIndex = clickIndexes[i];
+        const clickItem = state.mines_actual[clickIndex];
+        // 如果当前状态为打开或者插旗子都返回
+        if (clickItem.status !== MineItemStatus.close) continue;
+        // 插旗子
+        clickItem.status = MineItemStatus.flag;
+      }
+
+      state.mines_actual = [...state.mines_actual];
+      state.mines_matrix = chunk(state.mines_actual, 30);
+    },
     clickRight: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number }>) => {
       // 插旗子或取消插旗子
-      console.log(action);
+      // console.log(action);
       const clickIndex = action.payload.clickIndex;
       const clickItem = state.mines_actual[clickIndex];
 
@@ -374,7 +410,10 @@ const slice = createSlice({
         });
       }
     },
-    handleMouseEvent: (state: MineSweeperGameState, action: PayloadAction<{ clickIndex: number; button: number }>) => {
+    handleMouseEvent: (
+      state: MineSweeperGameState,
+      action: PayloadAction<{ clickIndex: number; button: ClickButtonType }>
+    ) => {
       const gameStatus = state.gameStatus;
       const { clickIndex, button } = action.payload;
 
@@ -389,11 +428,11 @@ const slice = createSlice({
         // 其他不处理
         return;
       }
-      if (button === 0) {
+      if (button === ClickButtonType.left) {
         slice.caseReducers.clickLeft(state, action);
-      } else if (button === 1) {
+      } else if (button === ClickButtonType.middle) {
         slice.caseReducers.clickMiddle(state, action);
-      } else if (button === 2) {
+      } else if (button === ClickButtonType.right) {
         slice.caseReducers.clickRight(state, action);
       }
 
@@ -408,36 +447,43 @@ const slice = createSlice({
       /**
        * state
        */
-      console.log('---1111');
+      console.log('自动扫雷');
       // slice.caseReducers.initGame();
       // TODO 上面这样为什么不生效
       state = createInitialState();
 
       setTimeout(() => {
         // 开局
-        store.dispatch(handleMouseEvent({ clickIndex: 30 * 7 + 15, button: 0 }));
+        store.dispatch(handleMouseEvent({ clickIndex: 30 * 7 + 15, button: ClickButtonType.left }));
 
         setTimeout(() => {
           /**
            * 开始遍历，插旗子
            * 一步一步进行
            */
-          store.dispatch(autoSweepMineDoing());
-        }, 50);
+          store.dispatch(autoSweepMineDoing({ trigger: 'first' }));
+        }, timeout);
       });
 
       return state;
     },
 
-    autoSweepMineDoing: (state: MineSweeperGameState) => {
+    autoSweepMineDoing: (state: MineSweeperGameState, action: PayloadAction<{ trigger: string }>) => {
+      // console.log('autoSweepMineDoing----', action.payload.trigger);
+
+      // 如果游戏已经结束，直接返回
       if (state.gameStatus !== MineSweeperStatus.doing) return;
 
-      // 本轮是否进行了处理
+      // 自动扫雷，目前是一轮一轮的遍历
+      // 本轮是否进行了处理，每轮只处理一次，如果处理过，就进行下一轮遍历
       let isProcessing = false;
+      let isPreProcessing = false; // 预处理是进行推理的第一步，并没有打开或标记某个位置
+
       for (let clickIndex = 0; clickIndex < 30 * 16; clickIndex++) {
         const clickItem = state.mines_actual[clickIndex];
         if (clickItem.resolved || clickItem.status !== MineItemStatus.open || clickItem.around_mine_count === 0) {
-          // 如果当前状态为关闭或者插旗子都不处理，只处理打开的
+          // 我们是根据打开的数字进行计算、推理
+          // 所以如果当前状态为关闭或者插旗子都不处理，只处理打开的
           continue;
         }
         const aroundCount = clickItem.around_count;
@@ -446,43 +492,42 @@ const slice = createSlice({
           console.error('aroundCount != aroundItems.length');
           return;
         }
-        let flagCount = 0;
-        let openCount = 0;
-        let closeCount = 0;
+        let aroundFlagCount = 0;
+        let aroundOpenCount = 0;
+        let aroundCloseCount = 0;
         const aroundMineCount = clickItem.around_mine_count;
 
         for (let i = 0; i < aroundItems.length; i++) {
           const item = aroundItems[i];
           if (item.item.status === MineItemStatus.flag) {
-            flagCount++;
+            aroundFlagCount++;
           } else if (item.item.status === MineItemStatus.open) {
-            openCount++;
+            aroundOpenCount++;
           } else if (item.item.status === MineItemStatus.close) {
-            closeCount++;
+            aroundCloseCount++;
           }
         }
 
-
-        if (flagCount === aroundMineCount) {
+        if (aroundFlagCount === aroundMineCount) {
           // 旗子数 === 雷数
-          if (openCount < aroundCount - aroundMineCount) {
-            // 打开数 < 总数 - 雷数(旗子数)
-            // 右击
+          if (aroundOpenCount < aroundCount - aroundMineCount) {
+            // 如果 还有未打开的，打开数 < 总数 - 雷数(旗子数)
+            // 中间按键，打开
             isProcessing = true;
             setTimeout(() => {
-              store.dispatch(handleMouseEvent({ clickIndex: clickIndex, button: 1 }))
+              store.dispatch(handleMouseEvent({ clickIndex: clickIndex, button: ClickButtonType.middle }));
               setTimeout(() => {
-                store.dispatch(autoSweepMineDoing())
-              }, 50)
-            }, 50)
+                store.dispatch(autoSweepMineDoing({ trigger: '1111' }));
+              }, timeout);
+            }, timeout);
           } else {
             // 都打开了，处理完成，不处理
             clickItem.resolved = true;
           }
-        } else if (flagCount < aroundMineCount) {
-          // 如果旗子数 < 雷数
-          if (openCount === aroundCount - aroundMineCount) {
-            // 如果都打开了，就给未打开的插上旗子
+        } else if (aroundFlagCount < aroundMineCount) {
+          // 旗子数 < 雷数
+          if (aroundOpenCount === aroundCount - aroundMineCount) {
+            // 打开数量 == 总数 - 雷数 说明都打开了，但有些没插旗子，就给未打开的插上旗子
             aroundItems.forEach((item) => {
               if (item.item.status === MineItemStatus.close) {
                 item.item.status = MineItemStatus.flag;
@@ -490,10 +535,86 @@ const slice = createSlice({
             });
             isProcessing = true;
             setTimeout(() => {
-              store.dispatch(autoSweepMineDoing())
-            })
+              store.dispatch(autoSweepMineDoing({ trigger: '2222' }));
+            }, timeout);
           } else {
-            // 否则就要进行推断了
+            // 否则打开数量 < 总数 - 雷数。就要进行推断了
+
+            // console.log(current(clickItem));
+
+            // m选n
+            // 周围未打开、未插旗的数量
+            const maybeCount = aroundCloseCount;
+            // 周围未标记的雷数
+            const maybeMineCount = aroundMineCount - aroundFlagCount;
+
+            /**
+             * 第一种情况
+             * flag + close > 雷数
+             * close数量为2，雷数 - flag数量为1
+             * 为2选1的情况
+             */
+            if (maybeCount === 2 && maybeMineCount === 1) {
+              const indexes = aroundItems
+                .filter((item) => item.item.status === MineItemStatus.close)
+                .map((item) => item.index)
+                .sort((a, b) => a - b);
+              indexes.forEach((index) => {
+                const others = state.group_2_1.get(index);
+                if (others === undefined) {
+                  state.group_2_1.set(index, [indexes]);
+                  isPreProcessing = true;
+                } else {
+                  if (findIndex(others, (o) => isEqual(o, indexes)) === -1) {
+                    others.push(indexes);
+                    isPreProcessing = true;
+                  }
+                }
+              });
+              // console.log(state.group_2_1.entries());
+            } else if (maybeMineCount === 1 || maybeCount - maybeMineCount === 1) {
+              // 遇到3选1时，判断是否存在2选1的情况
+              // 如果其中时2选1,则另外一个肯定不是雷
+              
+              const closeItems = aroundItems.filter((item) => item.item.status === MineItemStatus.close);
+              const closeItemsIndexes = closeItems.map((item) => item.index);
+              // console.log(`1111 clickIndex${clickIndex} maybeCount${maybeCount} maybeMineCount${maybeMineCount} closeItemsIndexes ${closeItemsIndexes}`);
+              for (let j = 0; j < closeItems.length; j++) {
+                // console.log(closeItems.filter((item, index) => index !== j).map((item) => current(item.item.group_2_1)))
+                const indexes_arr = state.group_2_1.get(closeItems[j].index);
+                // console.log('1122', j, indexes_arr)
+                if (indexes_arr === undefined) continue;
+
+                const indexes = indexes_arr.find((indexes) => {
+                  // indexes所有的元素都包含在closeItemsIndexes中
+                  return difference(indexes, closeItemsIndexes).length === 0;
+                });
+                if (!indexes) {
+                  // console.log('2222', clickIndex, closeItemsIndexes, closeItems[j].index, indexes_arr);
+                  continue;
+                };
+
+                // 这两个是一对儿
+                // 另外的index就是空的
+                const otherIndexes = difference(closeItemsIndexes, indexes);
+                isProcessing = true;
+
+                const ifOtherIndexIsMine = maybeMineCount === 1 ? false : true;
+                // console.log('3333', clickIndex, closeItemsIndexes, closeItems[j].index, indexes_arr, otherIndexes);
+
+                setTimeout(() => {
+                  if (ifOtherIndexIsMine) {
+                    store.dispatch(flagMulti({ clickIndexes: otherIndexes }));
+                  } else {
+                    store.dispatch(openMulti({ clickIndexes: otherIndexes }));
+                  }
+                  setTimeout(() => {
+                    store.dispatch(autoSweepMineDoing({ trigger: '3333' }));
+                  }, timeout);
+                }, timeout);
+                break;
+              }
+            }
           }
         }
 
@@ -501,8 +622,15 @@ const slice = createSlice({
           break;
         }
       }
+      if (!isProcessing && isPreProcessing) {
+        // 如果本轮没有进行，但是有预处理，则再触发一下自动扫雷
+        setTimeout(() => {
+          store.dispatch(autoSweepMineDoing({ trigger: '4444' }));
+        }, timeout);
+      }
 
-      if(!isProcessing) {
+      if (!isProcessing && !isPreProcessing) {
+        // 如果这一轮 一个都没有处理，也没有预处理，说明不会做了。
         console.log('主人，我不会了，需要你帮忙');
       }
 
@@ -514,6 +642,7 @@ const slice = createSlice({
   },
 });
 
+const { gameFail, gameSuccess, openMulti, flagMulti } = slice.actions;
 export const { initGame, handleMouseEvent, autoSweepMine, autoSweepMineDoing } = slice.actions;
 
 export default slice.reducer;
