@@ -107,7 +107,7 @@ export function Home() {
           >
             <Meta
               avatar={<Avatar src='https://joeschmoe.io/api/v1/random' />}
-              title={<a href='/mine-sweeper-game'>扫雷</a>}
+              title={<a href='/mine-sweeper'>扫雷</a>}
               description=""
             />
           </Card>

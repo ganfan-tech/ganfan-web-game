@@ -43,7 +43,7 @@ export function App() {
             <Route path='/profile/:username'>
               <ProfilePage />
             </Route>
-            <Route path='/mine-sweeper-game'>
+            <Route path='/mine-sweeper'>
               <MineSweeperGame />
             </Route>
             <Route exact path='/'>
