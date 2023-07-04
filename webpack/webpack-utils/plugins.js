@@ -1,13 +1,13 @@
-// const cleanWebpackPlugin = require("clean-webpack-plugin") ;
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CnameWebpackPlugin = require('cname-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 // const CopyPlugin = require("copy-webpack-plugin");
 const variable = require('./variable');
 const DotenvPlugin = require('dotenv-webpack');
 const webpack = require('webpack');
 const path = require('path');
 
-// const {CleanWebpackPlugin}=cleanWebpackPlugin;
 const { PUBLIC_PATH, DIST_PATH, ENV_CONFIG_PATH, IS_DEV, SRC_PATH } = variable;
 
 function getHTMLPlugins() {
@@ -25,15 +25,28 @@ function getHTMLPlugins() {
       minifyJS: true, // 压缩 HTML 中出现的 JS 代码
     },
   });
-
-  return [indexHtmlPlugin];
+  const index404HtmlPlugin = new HtmlWebpackPlugin({
+    template: path.join(PUBLIC_PATH, 'index.html'),
+    // filename: path.join(DIST_PATH, 'index.html'),
+    filename: '404.html',
+    inject: true, //true 插入body底部，head:插入head标签，false:不生成js文件
+    // hash: true, // 会在打包好的bundle.js后面加上hash串
+    title: '',
+    minify: {
+      removeComments: true, // 删除注释
+      collapseWhitespace: true,
+      minifyCSS: true, // 压缩 HTML 中出现的 CSS 代码
+      minifyJS: true, // 压缩 HTML 中出现的 JS 代码
+    },
+  });
+  return [indexHtmlPlugin,index404HtmlPlugin];
 }
 
 function getPlugins() {
   // clean
-  // const cleanPlugin = new CleanWebpackPlugin({
-  //     cleanOnceBeforeBuildPatterns: ["**/*", '!dll', '!dll/*.*']
-  // });
+  const cleanPlugin = new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ["**/*", '!dll', '!dll/*.*']
+  });
 
   const miniCssPlugin = new MiniCssExtractPlugin({
     filename: IS_DEV ? 'css/[name].css' : 'css/[name].[contenthash:8].css',
@@ -54,14 +67,17 @@ function getPlugins() {
   // });
 
   return [
-    // cleanPlugin,
+    cleanPlugin,
     // copyPlugin,
     ...getHTMLPlugins(),
     dotenvPlugin,
     miniCssPlugin,
     new webpack.ProvidePlugin({
       React: "react"
-    })
+    }),
+    new CnameWebpackPlugin({
+      domain: 'game.ganfan.tech',
+    }),
   ];
 }
 
