@@ -1,0 +1,93 @@
+
+
+.page-content {
+  background-color: #bebebe;
+}
+.page-content .game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+}
+.page-content .game-container .wrapper {
+  box-sizing: content-box;
+  width: 900px;
+  padding: 3px;
+  box-shadow: inset 3px 3px 0px #7b7b7b, inset -3px -3px 0px #fefefe;
+}
+.page-content .game-container .mine-sweeper-controller {
+  margin: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+  font-size: 20px;
+}
+.page-content .game-container .mine-sweeper-controller > * {
+  flex: 1;
+}
+.page-content .game-container .mine-sweeper-controller > :last-child {
+  display: flex;
+  justify-content: end;
+}
+.page-content .game-container .mine-sweeper-controller .start-btn {
+  display: flex;
+  justify-content: center;
+}
+.page-content .game-container .mine-sweeper-controller .start-btn button {
+  background-color: transparent;
+  border: none;
+  line-height: 1;
+  font-size: 30px;
+}
+.page-content .game-container .mine-sweeper-body {
+  width: 900px;
+}
+.page-content .game-container .mine-sweeper-body .mine-item {
+  width: 30px;
+  height: 30px;
+  align-content: center;
+  text-align: center;
+}
+.page-content .game-container .mine-sweeper-body .mine-item.mine-item-open {
+  background-image: url(/assets/images/e3096c432c0bc1ec0278.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.page-content .game-container .mine-sweeper-body .mine-item.mine-item-close {
+  background-image: url(/assets/images/258d853f7e083bfa9295.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.page-content .game-container .mine-sweeper-body .mine-item.is-mine {
+  color: red;
+}
+.page-content .game-container .mine-sweeper-body .mine-item span {
+  line-height: 30px;
+  margin: 0;
+  color: blue;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: default;
+  user-select: none;
+}
+.page-content .game-container .mine-sweeper-body .mine-item.flag-error {
+  position: relative;
+}
+.page-content .game-container .mine-sweeper-body .mine-item.flag-error::before,
+.page-content .game-container .mine-sweeper-body .mine-item.flag-error::after {
+  content: '';
+  position: absolute;
+  background-color: black;
+  left: 15px;
+  width: 2px;
+  height: 30px;
+}
+.page-content .game-container .mine-sweeper-body .mine-item.flag-error::before {
+  transform: rotate(45deg);
+}
+.page-content .game-container .mine-sweeper-body .mine-item.flag-error::after {
+  transform: rotate(-45deg);
+}
+
